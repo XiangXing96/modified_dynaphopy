@@ -38,28 +38,27 @@ def generate_VASP_structure(structure, scaled=False, supercell=(1, 1, 1)):
     return vasp_POSCAR
 
 
-def generate_LAMMPS_structure(structure, supercell=(1, 1, 1), by_element=True):
+def generate_LAMMPS_structure(structure, supercell=(1, 1, 1)):
 
     types = structure.get_atomic_elements(supercell=supercell)
 
-    if by_element:
+    type_index_unique = np.unique(types, return_index=True)[1]
 
-        type_index_unique = np.unique(types, return_index=True)[1]
+    # To use unique without sorting
+    sort_index = np.argsort(type_index_unique)
+    type_index_unique = np.array(type_index_unique)[sort_index]
 
-        # To use unique without sorting
-        sort_index = np.argsort(type_index_unique)
-        type_index_unique = np.array(type_index_unique)[sort_index]
+    count_index_unique = np.diff(np.append(type_index_unique, [len(types)]))
 
-        count_index_unique = np.diff(np.append(type_index_unique, [len(types)]))
-
-        atom_index = []
-        for i, index in enumerate(count_index_unique):
-            atom_index += [i for j in range(index)]
-
-    else:
-        atom_index = structure.get_atom_type_index(supercell=supercell)
+    atom_index = []
+    for i, index in enumerate(count_index_unique):
+        atom_index += [i for j in range(index)]
 
     atom_index_unique = np.unique(atom_index, return_index=True)[1]
+
+    index_dict = {}
+    for i, v in enumerate(atom_index_unique):
+        index_dict[types[v]] = i + 1
 
     masses = structure.get_masses(supercell=supercell)
     charges = structure.get_charges(supercell=supercell)
@@ -123,11 +122,12 @@ def generate_LAMMPS_structure(structure, supercell=(1, 1, 1), by_element=True):
 
     if charges is not None:
         for i, row in enumerate(positions):
-            lammps_data_file += '{0} {1} {2} {3:20.10f} {4:20.10f} {5:20.10f}\n'.format(i + 1, atom_index[i] + 1,
+            lammps_data_file += '{0} {1} {2} {3:20.10f} {4:20.10f} {5:20.10f}\n'.format(i + 1, index_dict[types[i]],
                                                                                         charges[i], row[0], row[1], row[2])
     else:
         for i, row in enumerate(positions):
-            lammps_data_file += '{0} {1} {2:20.10f} {3:20.10f} {4:20.10f}\n'.format(i+1, atom_index[i]+1, row[0],row[1],row[2])
+            lammps_data_file += '{0:10} {1} {2:20.10f} {3:20.10f} {4:20.10f}\n'.format(i+1, index_dict[types[i]], row[0],row[1],row[2])
+            #lammps_data_file += '{0} {1:20.10f} {2:20.10f} {3:20.10f}\n'.format(index_dict[types[i]], row[0],row[1],row[2])
 
     return lammps_data_file
 
