@@ -3,12 +3,14 @@
 #include <math.h>
 #include <stdlib.h>
 #include <complex.h>
-#include <numpy/arrayobject.h>
 
 #if defined(ENABLE_OPENMP)
 #include <omp.h>
 #endif
 
+
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#include <numpy/arrayobject.h>
 
 #undef I
 
@@ -118,16 +120,19 @@ static PyObject* correlation_par (PyObject* self, PyObject *arg, PyObject *keywo
         return NULL;
     }
 
-    _Dcomplex   *Velocity           = (_Dcomplex *)PyArray_DATA((PyArrayObject *)velocity_array);
-    double      *Frequency          = (double*)PyArray_DATA((PyArrayObject *)frequency_array);
-    npy_intp    NumberOfData        = PyArray_DIM((PyArrayObject *)velocity_array, 0);
-    npy_intp    NumberOfFrequencies = PyArray_DIM((PyArrayObject *)frequency_array, 0);
+    _Dcomplex  *Velocity = (_Dcomplex *)PyArray_DATA((PyArrayObject *)velocity_array);
+    double *Frequency    = (double*)PyArray_DATA((PyArrayObject *)frequency_array);
+    int     NumberOfData = (int)PyArray_DIM((PyArrayObject *)velocity_array, 0);
+    int     NumberOfFrequencies = (int)PyArray_DIM((PyArrayObject *)frequency_array, 0);
 
-    // Create new numpy array for storing result
+
+    //Create new numpy array for storing result
     PyArrayObject *PowerSpectrum_object;
-    npy_intp dims[] = {NumberOfFrequencies};
-    PowerSpectrum_object = (PyArrayObject *)PyArray_SimpleNew(1, dims, NPY_DOUBLE);
-    double *PowerSpectrum = (double *)PyArray_DATA(PowerSpectrum_object);
+    npy_intp dims[1]={NumberOfFrequencies};
+    //PowerSpectrum_object = (PyArrayObject *) PyArray_FromDims(1, dims,NPY_DOUBLE);
+    PowerSpectrum_object = (PyArrayObject *) PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+
+    double *PowerSpectrum  = (double*)PyArray_DATA((PyArrayObject *)PowerSpectrum_object);
 
     // Maximum Entropy Method Algorithm
     if (IntMethod < 0 || IntMethod > 1) {

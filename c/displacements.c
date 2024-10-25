@@ -3,6 +3,9 @@
 #include <math.h>
 #include <stdlib.h>
 #include <complex.h>
+
+
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
 
 
@@ -112,21 +115,22 @@ static PyObject *atomic_displacements(PyObject *self, PyObject *arg, PyObject *k
 
 
 //  double _Complex *Cell           = (double _Complex*)PyArray_DATA(Cell_array);
-    _Dcomplex *Trajectory           = (_Dcomplex*)PyArray_DATA((PyArrayObject *)Trajectory_array);
+    _Dcomplex *Trajectory     = (_Dcomplex*)PyArray_DATA((PyArrayObject *)Trajectory_array);
     double *Positions               = (double*)PyArray_DATA((PyArrayObject *)Positions_array);
 
-    npy_intp NumberOfData           = PyArray_DIM((PyArrayObject *)Trajectory_array, 0);
-    npy_intp NumberOfDimensions     = PyArray_DIM((PyArrayObject *)Cell_array, 0);
+    int NumberOfData       = (int)PyArray_DIM((PyArrayObject *)Trajectory_array, 0);
+    int NumberOfDimensions = (int)PyArray_DIM((PyArrayObject *)Cell_array, 0);
 
 //  Create new Numpy array to store the result
     _Dcomplex **Displacement;
     PyArrayObject *Displacement_object;
 
-    npy_intp dims[] = {NumberOfData, NumberOfDimensions};
-    Displacement_object = (PyArrayObject *)PyArray_SimpleNew(2, dims, NPY_CDOUBLE);
-    Displacement = pymatrix_to_c_array_complex(Displacement_object);
+    npy_intp dims[]={NumberOfData, NumberOfDimensions};
+    Displacement_object=(PyArrayObject *) PyArray_SimpleNew(2, dims, NPY_CDOUBLE);
+    Displacement=pymatrix_to_c_array_complex( Displacement_object);
 
-    //  Create a pointer array from cell matrix (to be improved)
+
+//  Create a pointer array from cell matrix (to be improved)
     double  **Cell_c = pymatrix_to_c_array_real((PyArrayObject *) Cell_array);
 
 /*
@@ -195,12 +199,18 @@ static PyObject *atomic_displacements(PyObject *self, PyObject *arg, PyObject *k
 
 static _Dcomplex **pymatrix_to_c_array_complex(PyArrayObject *array)  {
 
-      npy_intp n = PyArray_DIM(array, 0);
-      npy_intp m = PyArray_DIM(array, 1);
+      //long n=(*array).dimensions[0];
+      //long m=(*array).dimensions[1];
+
+      long n = PyArray_DIMS(array)[0];
+      long m = PyArray_DIMS(array)[1];
 
       _Dcomplex ** c = malloc(n*sizeof(_Dcomplex));
 
-      _Dcomplex *a = (_Dcomplex *)PyArray_DATA(array);  /* pointer to array data as double _Complex */
+      //_Dcomplex *a = (_Dcomplex *) (*array).data;  /* pointer to array data as double _Complex */
+
+      _Dcomplex *a = (_Dcomplex *) PyArray_DATA(array);
+
       for ( int i=0; i<n; i++)  {
           c[i]=a+i*m;
       }
@@ -211,12 +221,15 @@ static _Dcomplex **pymatrix_to_c_array_complex(PyArrayObject *array)  {
 
 static double  **pymatrix_to_c_array_real(PyArrayObject *array)  {
 
-      npy_intp n = PyArray_DIM(array, 0);
-      npy_intp m = PyArray_DIM(array, 1);
+      // long n=(*array).dimensions[0];
+      // long m=(*array).dimensions[1];
+      long n = PyArray_DIMS(array)[0];
+      long m = PyArray_DIMS(array)[1];
       //PyObject *transpose_array = PyArray_Transpose(array, dims);
 
       double  ** c = malloc(n*sizeof(double));
-      double *a = (double *)PyArray_DATA(array);
+      // double  *a = (double  *) (*array).data;
+      double *a = (double *) PyArray_DATA(array);
 
       for ( int i=0; i<n; i++)  {
           double  *b = malloc(m*sizeof(double));
