@@ -1,7 +1,12 @@
 import numpy as np
 import matplotlib.pylab as pl
 import warnings
-from scipy import integrate
+try:
+    from scipy.integrate import simps
+except ImportError:
+    from scipy.integrate import simpson as simps
+
+
 
 N_a = 6.022140857e23
 k_b = 1.38064852e-23  # J / K
@@ -37,7 +42,7 @@ def get_total_energy(temperature, frequency, dos):
     total_energy = np.nan_to_num([dos[i] * h_bar * freq * (0.5 + n(temperature, freq))
                                  for i, freq in enumerate(frequency)])
 
-    total_energy = integrate.simpson(total_energy, x=frequency) * N_a / 1000  # KJ/K/mol
+    total_energy = simps(total_energy, frequency) * N_a / 1000  # KJ/K/mol
     return total_energy
 
 
@@ -47,7 +52,7 @@ def get_free_energy(temperature, frequency, dos):
                                  for i, freq in enumerate(frequency)])
 
     free_energy[0] = 0
-    free_energy = integrate.simpson(free_energy, x=frequency) * N_a / 1000  # KJ/K/mol
+    free_energy = simps(free_energy, frequency) * N_a / 1000  # KJ/K/mol
     return free_energy
 
 
@@ -59,7 +64,7 @@ def get_free_energy_correction_shift(temperature, frequency, dos, shift):
     free_energy_c = np.nan_to_num([dos[i] * -h_bar/2 *shift*(n(temperature, freq) + 1 / 2.)
                                    for i, freq in enumerate(frequency)])
 
-    free_energy_c = integrate.simpson(free_energy_c, x=frequency) * N_a / 1000 # KJ/K/mol
+    free_energy_c = simps(free_energy_c, frequency) * N_a / 1000 # KJ/K/mol
     return free_energy_c
 
 
@@ -76,7 +81,7 @@ def get_free_energy_correction_dos(temperature, frequency, dos, dos_r):
 
     free_energy_c = free_energy_1 - free_energy_2
 
-    free_energy_c = integrate.simpson(free_energy_c, x=frequency) * N_a / 1000 # KJ/K/mol
+    free_energy_c = simps(free_energy_c, frequency) * N_a / 1000 # KJ/K/mol
     return free_energy_c
 
 
@@ -88,7 +93,7 @@ def get_entropy(temperature, frequency, dos):
     entropy = np.nan_to_num([dos[i]*(1.0 / (2. * temperature) * h_bar * freq * coth(h_bar * freq / (2 * k_b * temperature))
                                      - k_b * np.log(2 * np.sinh(h_bar * freq / (2 * k_b * temperature))))
                              for i, freq in enumerate(frequency)])
-    entropy = integrate.simpson(entropy, x=frequency) * N_a # J/K/mol
+    entropy = simps(entropy, frequency) * N_a # J/K/mol
     return entropy
 
 # Alternative way to calculate entropy (not used)
@@ -100,7 +105,7 @@ def get_entropy2(temperature, frequency, dos):
     entropy = np.nan_to_num([dos[i] * k_b * ((n(temperature, freq) + 1) * np.log(n(temperature, freq) + 1)
                                              - n(temperature, freq) * np.log(n(temperature, freq)))
                          for i, freq in enumerate(frequency)])
-    entropy = integrate.simpson(entropy, x=frequency) * N_a # J/K/mol
+    entropy = simps(entropy, frequency) * N_a # J/K/mol
     return entropy
 
 
@@ -111,7 +116,7 @@ def get_cv(temperature, frequency, dos):
 
     c_v = np.nan_to_num([dos[i] * k_b * pow(z(temperature, freq), 2) * np.exp(z(temperature, freq)) / pow(np.exp(z(temperature, freq)) - 1, 2)
                          for i, freq in enumerate(frequency)])
-    c_v = integrate.simpson(c_v, x=frequency) * N_a # J/K/mol
+    c_v = simps(c_v, frequency) * N_a # J/K/mol
 
     return c_v
 
@@ -171,7 +176,7 @@ if __name__ == "__main__":
     print ('Entropy: {0} J/K/mol'.format(entropy))
     print ('Cv: {0} J/K/mol'.format(c_v))
     print (np.trapz(dos_r, x=frequency_r))/(8*3)
-    print (integrate.simpson(dos_r,x=frequency_r)/(8*3))
+    print (simps(dos_r,x=frequency_r)/(8*3))
 
     print ('\nFrom MD')
     print ('-------------------------')
@@ -183,7 +188,7 @@ if __name__ == "__main__":
     print ('Entropy: {0} J/K/mol'.format(entropy))
     print ('Cv: {0} J/K/mol'.format(c_v))
     print (np.trapz(power_spectrum, x=frequency_p))/(8*3)
-    print (integrate.simpson(power_spectrum, x=frequency_p))/(8*3)
+    print (simps(power_spectrum, x=frequency_p))/(8*3)
 
     print ('\nHARMONIC')
     print ('-------------------------')
@@ -195,4 +200,4 @@ if __name__ == "__main__":
     print ('Entropy: {0} J/K/mol'.format(entropy))
     print ('Cv: {0} J/K/mol'.format(c_v))
     print (np.trapz(dos, x=frequency)/(8*3))
-    print (integrate.simpson(dos, x=frequency)/(8*3))
+    print (simps(dos, x=frequency)/(8*3))
