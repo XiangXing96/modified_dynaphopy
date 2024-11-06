@@ -1,7 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import simps
 from dynaphopy.analysis.fitting import fitting_functions
+
+try:
+    from scipy.integrate import simps
+except ImportError:
+    from scipy.integrate import simpson as simps
+
 
 h_planck = 4.135667662e-3  # eV/ps
 h_planck_bar = h_planck/(2.0*np.pi)  # eV/ps
