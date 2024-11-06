@@ -13,7 +13,10 @@ import matplotlib.pyplot as plt
 
 
 from dynaphopy.power_spectrum import power_spectrum_functions
-from scipy import integrate
+try:
+    from scipy.integrate import simps
+except ImportError:
+    from scipy.integrate import simpson as simps
 
 
 class Quasiparticle:
@@ -912,7 +915,7 @@ class Quasiparticle:
         # plt.legend()
         plt.show()
 
-        total_integral = integrate.simps(self.get_power_spectrum_full(), x=self.get_frequency_range())
+        total_integral = simps(self.get_power_spectrum_full(), x=self.get_frequency_range())
         print("Total Area (Kinetic energy <K>): {0} eV".format(total_integral))
 
     def plot_power_spectrum_wave_vector(self):
@@ -922,7 +925,7 @@ class Quasiparticle:
         plt.ylabel('eV * ps')
         plt.axhline(y=0, color='k', ls='dashed')
         plt.show()
-        total_integral = integrate.simps(self.get_power_spectrum_wave_vector(), x=self.get_frequency_range())
+        total_integral = simps(self.get_power_spectrum_wave_vector(), x=self.get_frequency_range())
         print("Total Area (Kinetic energy <K>): {0} eV".format(total_integral))
 
     def plot_power_spectrum_phonon(self):
@@ -1033,14 +1036,14 @@ class Quasiparticle:
         reading.write_curve_to_file(self.get_frequency_range(),
                                     self.get_power_spectrum_full()[None].T,
                                     file_name)
-        total_integral = integrate.simps(self.get_power_spectrum_full(), x=self.get_frequency_range())
+        total_integral = simps(self.get_power_spectrum_full(), x=self.get_frequency_range())
         print("Total Area (Kinetic energy <K>): {0} eV".format(total_integral))
 
     def write_power_spectrum_wave_vector(self, file_name):
         reading.write_curve_to_file(self.get_frequency_range(),
                                     self.get_power_spectrum_wave_vector()[None].T,
                                     file_name)
-        total_integral = integrate.simps(self.get_power_spectrum_wave_vector(), x=self.get_frequency_range())
+        total_integral = simps(self.get_power_spectrum_wave_vector(), x=self.get_frequency_range())
         print("Total Area (Kinetic energy <K>): {0} eV".format(total_integral))
 
     def write_power_spectrum_phonon(self, file_name):
@@ -1260,7 +1263,7 @@ class Quasiparticle:
                                                        projected_on_atom=self.parameters.project_on_atom,
                                                        NAC=self.parameters.use_NAC)
 
-        integration = integrate.simps(phonopy_dos[1], x=phonopy_dos[0]) / (
+        integration = simps(phonopy_dos[1], x=phonopy_dos[0]) / (
                 self.dynamic.structure.get_number_of_atoms() *
                 self.dynamic.structure.get_number_of_dimensions())
 
@@ -1333,7 +1336,7 @@ class Quasiparticle:
 
             power_spectrum_dos = thm.get_dos(temperature, frequency_range, self.get_power_spectrum_full(),
                                              normalization)
-            integration = integrate.simps(power_spectrum_dos, x=frequency_range) / (
+            integration = simps(power_spectrum_dos, x=frequency_range) / (
                 self.dynamic.structure.get_number_of_atoms() *
                 self.dynamic.structure.get_number_of_dimensions())
 
