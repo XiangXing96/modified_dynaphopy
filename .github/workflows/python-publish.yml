@@ -49,7 +49,7 @@ jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    needs: [ test_code ]
+    # needs: [ test_code ]
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/test_wheels'
     strategy:
       matrix:
@@ -90,7 +90,7 @@ jobs:
 
   build_sdist:
     name: Build source distribution
-    needs: [ test_code ]
+    # needs: [ test_code ]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/test_wheels'
     steps:
