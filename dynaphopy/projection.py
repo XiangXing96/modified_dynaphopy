@@ -1,5 +1,5 @@
 import numpy as np
-
+import numba
 
 def project_onto_wave_vector(trajectory, q_vector, project_on_atom=-1):
 
