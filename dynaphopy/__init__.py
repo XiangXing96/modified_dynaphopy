@@ -639,8 +639,19 @@ class Quasiparticle:
     def get_vq(self):
         if self._vq is None:
             print("Projecting into phonon mode")
-            self._vq = projection.project_onto_phonon(self.get_vc(), self.get_eigenvectors())
+            if self.dynamic.structure._is_amorphous:
+                print("Calculating vibrational projection for amorphous structure")
+                self._vq = projection.project_onto_phonon_amorphous(self.get_vc(), self.get_eigenvectors())
+            else:
+                print("Calculating vibrational projection for crystalline structure")
+                self._vq = projection.project_onto_phonon(self.get_vc(), self.get_eigenvectors())
+                
         return self._vq
+        
+        #if self._vq is None:
+        #    print("Projecting into phonon mode")
+        #    self._vq = projection.project_onto_phonon(self.get_vc(), self.get_eigenvectors())
+        #return self._vq
 
     def plot_vq(self, modes=None):
         if not modes:
