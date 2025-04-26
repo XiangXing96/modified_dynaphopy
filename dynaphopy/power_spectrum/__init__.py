@@ -234,8 +234,16 @@ def _numpy_power(frequency_range, data, time_step):
 
         data_piece = data[i_p[0]:i_p[1]]
 
-        data_piece = np.correlate(data_piece, data_piece, mode='same') / data_piece.size
-        ps.append(np.abs(np.fft.fft(data_piece))*time_step)
+        #data_piece = np.correlate(data_piece, data_piece, mode='same') / data_piece.size
+        #ps.append(np.abs(np.fft.fft(data_piece))*time_step)
+
+        # accelebrate by replacing Fourier transformation of v-v auto-corr with the 
+        # square of Fourier transformation of v, which are mathmatically equivalent.  
+
+        data_piece = np.abs(np.fft.fft(data_piece))**2 / data_piece.size # normalized by 1/N
+        ps.append(data_piece * time_step) # modify unit
+
+    
 
     ps = np.average(ps,axis=0)
 
