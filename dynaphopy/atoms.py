@@ -15,7 +15,8 @@ class Structure:
                  atomic_numbers=None,
                  atomic_elements=None,
                  atom_type_index=None,
-                 primitive_matrix=None):
+                 primitive_matrix=None,
+                 is_amorphous=None):
 
         """
         :param positions: atoms cartesian positions (array Ndim x Natoms)
@@ -42,6 +43,7 @@ class Structure:
         self._positions = positions
         self._primitive_matrix = primitive_matrix
         self._charges = charges  # Only for LAMMPS supercell generation
+        self._is_amorphous = is_amorphous  # to acelebrate calculations of amorphpus materials, xx
 
         self._primitive_cell = None
         self._supercell_matrix = None
