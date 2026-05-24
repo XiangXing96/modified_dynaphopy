@@ -1,6 +1,6 @@
 import numpy as np
 from phonopy.api_phonopy import Phonopy
-from phonopy.file_IO import parse_BORN, parse_FORCE_SETS, write_FORCE_CONSTANTS, parse_FORCE_CONSTANTS
+from phonopy.file_IO import parse_BORN, parse_FORCE_SETS, write_FORCE_CONSTANTS, parse_FORCE_CONSTANTS, write_force_constants_to_hdf5
 from phonopy.harmonic.dynmat_to_fc import DynmatToForceConstants
 from phonopy.harmonic.force_constants import set_tensor_symmetry_PJ
 from phonopy.units import VaspToTHz
@@ -78,6 +78,9 @@ def save_force_constants_to_file(force_constants, filename='FORCE_CONSTANTS'):
     # Just a wrapper to phonopy function
     write_FORCE_CONSTANTS(force_constants.get_array(), filename=filename)
 
+def save_force_constants_to_hdf5_file(force_constants, filename="force_constants.hdf5"):
+    # Just a wrapper to phonopy function
+    write_force_constants_to_hdf5(force_constants.get_array(), filename=filename, compression='gzip')
 
 def get_phonon(structure, NAC=False, setup_forces=True, custom_supercell=None, symprec=1e-5):
 
